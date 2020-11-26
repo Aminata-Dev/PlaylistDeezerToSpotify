@@ -1,5 +1,6 @@
 # PlaylistDeezerToSpotify
 Permet la migration de playlist Deezer à Spotify
+
 Prérequis : 
 - installer le module spotipy ( Sur windows : pip intall spotipy )
 - installer le module requests ( Sur windows : pip install requests )
