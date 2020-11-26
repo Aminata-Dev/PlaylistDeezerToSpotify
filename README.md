@@ -2,7 +2,7 @@
 Permet la migration de playlist Deezer à Spotify ( pas besoin d'abonnement )
 
 Attention:
-- Si c'est la première fois que vous lancer le code, vous serez peut-être ammenés à accepter une autorisation Spotify sur une page web. Après l'avoir accepté, relancer le code.
+- Si c'est la première fois que vous lancez le code, vous serez peut-être ammenés à accepter une autorisation Spotify sur une page web. Après l'avoir accepté, relancer le code.
 
 Prérequis : 
 - installer le module spotipy. Sur windows : 
