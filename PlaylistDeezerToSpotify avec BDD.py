@@ -47,7 +47,7 @@ if "error" in list(informations_deezer.json().keys()):
 liste_uri_spotify_musiques = []
 #Initialisation des données du compte spotify :
 nom_utilisateur_spotify = input("Quel est votre nom d'utilisateur Spotify : ( https://www.spotify.com/fr/account/overview/?utm_source=play&utm_campaign=wwwredirect > Nom d'utilisateur )\n@> ")
-id_client = input("Quel est votre Client ID Spotify ? ( Si c'est la première fois que vous utiliser l'api de Spotify : https://developer.spotify.com/dashboard > Create an app > Create > Client ID / Sinon https://developer.spotify.com/dashboard > Go to your app > Client ID )\n@> ")
+id_client = input("Quel est votre Client ID Spotify ? ( Si c'est la première fois que vous utiliser l'api de Spotify : https://developer.spotify.com/dashboard > Create an app > Create > Edit Settings > dans Redirect URIs mettre http://127.0.0.1:8080/ > Add > Descendre > Save > Client ID // Si vous possedez déjà une app > https://developer.spotify.com/dashboard > Go to your app > Edit Settings > dans Redirect URIs mettre http://127.0.0.1:8080/ > Add > Descendre > Save > Client ID )\n@> ")
 mdp_client = input("Quel est votre Client Secret Spotify ? ( https://developer.spotify.com/dashboard/applications > Go to your app > Show Client Secret > Client Secret )\n@> ")
 #Ces informations servent à utiliser l'api de Spotify ( voir SpotifyForDevelopers ) par l'intermédiaire de la librairie:
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id = id_client,
