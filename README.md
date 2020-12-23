@@ -7,11 +7,11 @@ Attention:
 Prérequis : 
 - installer le module spotipy. Sur windows : 
 ```py
-pip intall spotipy 
+pip install spotipy
 ```
 - installer le module requests. Sur windows : 
 ```py
-pip install requests 
+pip install requests
 ```
 - installer le module webbrowser. Sur windows : 
 ```py
