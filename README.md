@@ -1,45 +1,36 @@
 # PlaylistDeezerToSpotify
-Permet la migration de playlist Deezer à Spotify ( pas besoin d'abonnement )
+Allows migration of Deezer playlist into Spotify playlist ( no subscription required )
 
-Attention:
-- Si c'est la première fois que vous lancez le code, vous serez peut-être ammenés à accepter une autorisation Spotify sur une page web. Après l'avoir accepté, relancer le code.
+⚠️
+- If this is the first time you run the code, you may be prompted to accept a Spotify authorization on a web page. After accepting it, run the code again.
 
-Prérequis : 
-- installer le module spotipy. Sur windows : 
+Requirements :
+- the python libraries spotipy, requests and webbrowser :
 ```py
-pip install spotipy
+pip3 install spotipy requests webbrowser
 ```
-- installer le module requests. Sur windows : 
-```py
-pip install requests
-```
-- installer le module webbrowser. Sur windows : 
-```py
-pip install webbrowser
-```
-- Pour le code avec la base de donnée : installer le module mysql-connector-python ( sur windows : 
+- for the code with the database : the python library mysql-connector-python and Xampp ( https://www.apachefriends.org/index.html ) : 
 ```py
 pip install mysql-connector-python
 ```
- ), puis installer Xampp ( https://www.apachefriends.org/fr/index.html ) + start Apache et MySQL
  
- Demonstration :
+Demo :
  
- S'assurer d'avoir entrer les bonnes informations :
+ Make sure you have entered the right informations :
  ![1](https://github.com/Aminata-Dev/PlaylistDeezerToSpotify/blob/main/Screenshots/1.png)
  
- Dans la console s'affiche tous les titres :
+ All titles are displayed in the console:
  ![1](https://github.com/Aminata-Dev/PlaylistDeezerToSpotify/blob/main/Screenshots/2.PNG)
  
- Choisir un nom de playlist ( pour obtenir le même nom que la playlist deezer, laisser vide ) :
+ Choose a playlist name ( to get the same name as the Deezer playlist, leave empty ) :
  ![1](https://github.com/Aminata-Dev/PlaylistDeezerToSpotify/blob/main/Screenshots/3.PNG)
  
- Deux liens s'ouvrent ( pour la partie sans BDD ). On retrouve la playlist Deezer originale et la nouvelle playlist Spotify :
+ And that's it. Your new playlist opens in a browser :
  ![1](https://github.com/Aminata-Dev/PlaylistDeezerToSpotify/blob/main/Screenshots/4.png)
  ![1](https://github.com/Aminata-Dev/PlaylistDeezerToSpotify/blob/main/Screenshots/5.PNG)
  ![1](https://github.com/Aminata-Dev/PlaylistDeezerToSpotify/blob/main/Screenshots/6.png)
  
- Une troisième page s'ouvre pour la partie BDD; avec deux tables dedans :
+ For the part with the database, the database opens in your browser
  ![1](https://github.com/Aminata-Dev/PlaylistDeezerToSpotify/blob/main/Screenshots/7.PNG)
  ![1](https://github.com/Aminata-Dev/PlaylistDeezerToSpotify/blob/main/Screenshots/8.PNG)
  ![1](https://github.com/Aminata-Dev/PlaylistDeezerToSpotify/blob/main/Screenshots/9.PNG)
