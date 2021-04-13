@@ -7,11 +7,11 @@ Allows migration of Deezer playlist into Spotify playlist ( no subscription requ
 Requirements :
 - the python libraries spotipy, requests and webbrowser :
 ```py
-pip3 install spotipy requests webbrowser
+pip3 install spotipy requests
 ```
 - for the code with the database : the python library mysql-connector-python and Xampp ( https://www.apachefriends.org/index.html ) : 
 ```py
-pip install mysql-connector-python
+pip3 install mysql-connector-python
 ```
  
 Demo :
