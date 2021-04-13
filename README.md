@@ -2,7 +2,7 @@
 Allows migration of Deezer playlist into Spotify playlist ( no subscription required )
 
 Requirements :
-- the python libraries spotipy, requests and webbrowser :
+- the python libraries spotipy and requests :
 ```py
 pip3 install spotipy requests
 ```
