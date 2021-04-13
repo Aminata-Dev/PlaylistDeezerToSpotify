@@ -1,9 +1,6 @@
 # PlaylistDeezerToSpotify
 Allows migration of Deezer playlist into Spotify playlist ( no subscription required )
 
-⚠️
-- If this is the first time you run the code, you may be prompted to accept a Spotify authorization on a web page. After accepting it, run the code again.
-
 Requirements :
 - the python libraries spotipy, requests and webbrowser :
 ```py
