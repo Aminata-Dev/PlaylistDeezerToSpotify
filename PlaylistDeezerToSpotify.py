@@ -10,7 +10,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import webbrowser
 import json #Permet de convertir des json en dictionnaire python
 import time #afin de laisser du temps entre deux requêtes si la longueur de la playlist est supérieur à 100
-import os #pour verifier si le fichier texte contenant les informations spotify existe
+import os #pour verifier si le fichier texte contenant les informations spotify existe et supprimer le fichier contenant les informations
 
 
 #P1 : Initialisation des variables, données et fonctions :
@@ -31,21 +31,23 @@ if "error" in list(informations_deezer.json().keys()):
     exit()
 
 def ecriture_informations_fichier_texte(nom, id_, mdp):
+    if os.path.exists("informations_spotify_accounts_in_order_to_automate_the_process.txt"): #Si le fichier contenant les informations existe...
+        os.remove("informations_spotify_accounts_in_order_to_automate_the_process.txt") #... on supprime le ficher
     #systeme de stockage des informations en local sur un fichier texte afin de ne pas avoir à retaper toutes les informations à chaque lancement du code
-    with open('informations_spotify_accounts_in_order_to_automate_the_process.txt', 'w') as fichier:
+    with open("informations_spotify_accounts_in_order_to_automate_the_process.txt", 'w') as fichier: #creation du fichier texte
         for i in nom, id_, mdp:
-            fichier.write(i + '\n')
+            fichier.write(f"{i}\n")
 
 liste_uri_spotify_musiques = []
 
 if os.path.exists('informations_spotify_accounts_in_order_to_automate_the_process.txt'): #Si le fichier contenant les informations existe...
-    demande_remplissage_automatique = input("\nInformations that you have entered previously has been found. Would you like to enter your Spotify username, Spotify Client ID and your Spotify Client Secret automatically ? ( y --> yes / other --> no ) \n @> ") #...on demande à l'utilisateur s'il veut les rentrer automatiquement
+    demande_remplissage_automatique = input("\nInformations that you have entered previously has been found. Would you like to enter your Spotify username, Spotify Client ID and your Spotify Client Secret automatically ? ( y --> yes / other --> no )\n@> ") #...on demande à l'utilisateur s'il veut les rentrer automatiquement
     if demande_remplissage_automatique == 'y': #Si une demande de remplissage auto est demandée, on vient lire le fichier
         with open('informations_spotify_accounts_in_order_to_automate_the_process.txt', 'r') as fichier:
-            lignes_fichier = fichier.readlines()
-            nom_utilisateur_spotify, id_client, mdp_client = lignes_fichier
-            print(nom_utilisateur_spotify, id_client, mdp_client)
-else:
+            lignes_fichier = fichier.read()
+            #car avec la méthode readlines, chaque str etait precede d'un \n, ce qui creait des conflit car il etait "invisible" :
+            nom_utilisateur_spotify, id_client, mdp_client = lignes_fichier.split('\n')[0], lignes_fichier.split('\n')[1], lignes_fichier.split('\n')[2]
+if demande_remplissage_automatique != 'y': #Si l'utilisateur ne veut pas entrer ces informations automatiquement
     #Initialisation des données du compte spotify :
     nom_utilisateur_spotify = input("\nWhat is your Spotify username ? : ( https://www.spotify.com/ca-en/account/overview/?utm_source=play&utm_campaign=wwwredirect > Copy/Past Username )\n@> ")
     id_client = input("\nWhat is your Spotify Client ID ?\n --> If this is the first time you use the Spotify API : https://developer.spotify.com/dashboard > Create an app > Create > Edit Settings > in Redirect URIs put http://127.0.0.1:8080/ > Add > Go down > Save > Copy/Past Client ID\n --> If you already get an app > https://developer.spotify.com/dashboard > Go to your app > Edit Settings > in Redirect URIs put http://127.0.0.1:8080/ > Add > Go down > Save > Copy/Past Client ID )\n@> ")
@@ -76,7 +78,7 @@ def remede_probleme_recherche_spotify():
 
 print(f"Display of all the songs in the playlist named '{informations_deezer.json()['title']}' : ")
 try:
-    for i in range(200): #Dans cette boucle :
+    for i in range(len(informations_deezer.json()['tracks']['data'])): #Dans cette boucle :
         artiste = informations_deezer.json()['tracks']['data'][i]['artist']['name'] #On récupère l'information artiste de la playlist dans une variable
         titre = informations_deezer.json()['tracks']['data'][i]['title'] #On récupère l'information titre de la playlist dans une variable
         resultats_musiques_spotify = sp.search(q=f"{titre} {artiste}", limit=1) #On recherche le titre et l'artiste trouvé sur Spotify
@@ -86,20 +88,22 @@ try:
         for son in resultats_musiques_spotify['tracks']['items']: #Pour chaque titre trouvé sur Spotify...
             print(f"{i + 1} : {son['name']} - {son['artists'][0]['name']}") #...on affiche le titre et son artiste dans la console ( i + 1 pour commencer à 1 )
             liste_uri_spotify_musiques.append(son['uri']) #On ajoute l'uri spotify ( identificateur ) de la musique dans une liste
-except IndexError: #Si il n'y a plus de musique, on ne fait plus rien
-    pass
+except spotipy.oauth2.SpotifyOauthError: #Si il n'y a plus de musique, on ne fait plus rien
+    print("First time here ? You need to authorize third-party access in your browser ! If not, retry or create a new app.")
+    os.remove("informations_spotify_accounts_in_order_to_automate_the_process.txt") #si les infos ne sont pas bonnes, on les supprime
+    exit()
 
 
 #P3 : On ajoute les musiques, via leurs uri, dans une playlist spotify :
 
 #Condition permettant de choisir le nom de la nouvelle playlist
-choix = input("Would you like to change the name of the new Spotify playlist ? ( y --> yes / other --> no ) \n @> ")
+choix = input("Would you like to change the name of the new Spotify playlist ? ( y --> yes / other --> no )\n@> ")
 if choix == 'y': nom_nouvelle_playlist_spotify = input("Name of the new Spotify playlist \n @> ")
 else:nom_nouvelle_playlist_spotify = informations_deezer.json()['title']
 
+#Utilisation de la librairie Spotipy :
+sp.user_playlist_create(user=nom_utilisateur_spotify, name=nom_nouvelle_playlist_spotify, public=True) #On crée la playlist
 def alimentation_playlist_spotify(arg_liste_uri_spotify_musiques):
-    #Utilisation de la librairie Spotipy
-    sp.user_playlist_create(user=nom_utilisateur_spotify, name=nom_nouvelle_playlist_spotify, public=True) #On crée la playlist
     global id_playlist_spotify #on passe la variable en global afin de la réutiliser dans le lien
     id_playlist_spotify = sp.user_playlists(user = nom_utilisateur_spotify)['items'][0]['id'] #On récupère l'id de la playlist
     sp.user_playlist_add_tracks(user= nom_utilisateur_spotify, playlist_id=id_playlist_spotify, tracks=arg_liste_uri_spotify_musiques) #On ajoute les musiques dans la playlist Spotify par l'intermédiaire de leurs uri
