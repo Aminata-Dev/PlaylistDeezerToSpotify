@@ -22,8 +22,13 @@ except ValueError: #Si le lien n'est pas valide, on sort du programme
     print("The link is not valid, please try again")
     exit()
 
+#le lien de playlist Deezer que l'utilisateur entre est parfois accompagné de "?utm_campaign=clipboard-generic&..." après l'id. On essaye de voir si c'est le cas et de couper à partir du point d'intérrogation pour ne récupérer que l'id
+try: id_playlist_deezer = id_playlist_deezer[:id_playlist_deezer.index('?')]
+except ValueError: pass
+
 url_playlist_deezer = f"https://api.deezer.com/playlist/{id_playlist_deezer}" #On restitue le lien avec l'id afin de pouvoir utiliser l'api de deezer
-informations_deezer = requests.get(url_playlist_deezer) #On récupère la page
+informations_deezer = requests.get(url_playlist_deezer) #On récupère la page contenant les informations générales de la playlist afin d'utiliser le titre de la playlist
+informations_deezer_tracks = requests.get(f"{url_playlist_deezer}/tracks") #On récupère la page
 
 #Si la page affiche une erreur, on sort du programme
 if "error" in list(informations_deezer.json().keys()):
@@ -39,6 +44,7 @@ def ecriture_informations_fichier_texte(nom, id_, mdp):
             fichier.write(f"{i}\n")
 
 liste_uri_spotify_musiques = []
+liste_musique_pas_trouve = []
 
 if os.path.exists('informations_spotify_accounts_in_order_to_automate_the_process.txt'): #Si le fichier contenant les informations existe...
     demande_remplissage_automatique = input("\nInformations that you have entered previously has been found. Would you like to enter your Spotify username, Spotify Client ID and your Spotify Client Secret automatically ? ( y --> yes / other --> no )\n@> ") #...on demande à l'utilisateur s'il veut les rentrer automatiquement
@@ -61,7 +67,7 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id = id_client,
                                             username = nom_utilisateur_spotify,
                                             scope = "playlist-modify-public"))
 
-print("\n( IF A WEB PAGE OPENS WITH 'INVALID_CLIENT: Invalid client' in, YOU DID NOT ENTER THE CORRECT SPOTIFY INFORMATIONS (CHECK THE SPACES WHEN YOU ENTER THE DIFFERENT INFORMATIONS) )\n")
+print("\n( IF A WEB PAGE OPENS WITH 'INVALID_CLIENT: Invalid client' in, YOU DID NOT ENTER THE CORRECT SPOTIFY INFORMATIONS ( CHECK THE SPACES WHEN YOU ENTER THE DIFFERENT INFORMATIONS ) )\n")
 
 #Fonction permettant de palier aux différents problèmes lors de la recherche de titre et d'artiste sur Spotify ( en créant une nouvelle recherche ) (P2)
 def remede_probleme_recherche_spotify():
@@ -72,22 +78,28 @@ def remede_probleme_recherche_spotify():
         try:resultats_musiques_spotify = sp.search(q=f"{titre} {artiste[0:artiste.index('&')]}", limit=1) #Dans certains titres, les artistes sont séparés par des '&' sur Deezer, mais pas sur Spotify ( --> l'on coupe alors le nom des artistes du début jusqu'au & )
         except ValueError: #Si le problème n'est toujours pas ça :
             print(f"{'*' * 80}\nThe song {titre} of {artiste} is certainly not on Spotify\n{'*' * 80}")
+            liste_musique_pas_trouve.append(titre + artiste)
 
 
 #P2 : On récupère l'uri spotify de chaque musique de la playlist deezer :
 
 print(f"Display of all the songs in the playlist named '{informations_deezer.json()['title']}' : ")
 try:
-    for i in range(len(informations_deezer.json()['tracks']['data'])): #Dans cette boucle :
-        artiste = informations_deezer.json()['tracks']['data'][i]['artist']['name'] #On récupère l'information artiste de la playlist dans une variable
-        titre = informations_deezer.json()['tracks']['data'][i]['title'] #On récupère l'information titre de la playlist dans une variable
+    compteur = 0 #compteur allant de 0 à 24, servant à indexer correctement chaque son d'un page
+    for i in range(informations_deezer_tracks.json()['total']): #Dans cette boucle :
+        artiste = informations_deezer_tracks.json()['data'][compteur]['artist']['name'] #On récupère l'information artiste de la playlist dans une variable
+        titre = informations_deezer_tracks.json()['data'][compteur]['title'] #On récupère l'information titre de la playlist dans une variable
         resultats_musiques_spotify = sp.search(q=f"{titre} {artiste}", limit=1) #On recherche le titre et l'artiste trouvé sur Spotify
         if resultats_musiques_spotify['tracks']['total'] == 0: remede_probleme_recherche_spotify() #Si la recherche n'a rien donné, on utilise la fonction "remede"
         # print(resultats_musiques_spotify) #Affiche le dictionnaire de la recherche
         # print(titre, artiste) #Affiche la recherche menée sur Spotify
+        compteur += 1
         for son in resultats_musiques_spotify['tracks']['items']: #Pour chaque titre trouvé sur Spotify...
             print(f"{i + 1} : {son['name']} - {son['artists'][0]['name']}") #...on affiche le titre et son artiste dans la console ( i + 1 pour commencer à 1 )
             liste_uri_spotify_musiques.append(son['uri']) #On ajoute l'uri spotify ( identificateur ) de la musique dans une liste
+        if compteur in [j for j in range(25, informations_deezer_tracks.json()['total'], 25)]: #le json affiche 25 sons sur une page, et les 25 autres sur l'autre page. Si nous avons parcouru les 25 sons de la page...
+            informations_deezer_tracks = requests.get(f"{informations_deezer_tracks.json()['next']}/tracks") #... on modifie la variable contenant les infos
+            compteur = 0
 except spotipy.oauth2.SpotifyOauthError: #Si il n'y a plus de musique, on ne fait plus rien
     print("First time here ? You need to authorize third-party access in your browser ! If not, retry or create a new app.")
     os.remove("informations_spotify_accounts_in_order_to_automate_the_process.txt") #si les infos ne sont pas bonnes, on les supprime
@@ -98,7 +110,7 @@ except spotipy.oauth2.SpotifyOauthError: #Si il n'y a plus de musique, on ne fai
 
 #Condition permettant de choisir le nom de la nouvelle playlist
 choix = input("Would you like to change the name of the new Spotify playlist ? ( y --> yes / other --> no )\n@> ")
-if choix == 'y': nom_nouvelle_playlist_spotify = input("Name of the new Spotify playlist \n @> ")
+if choix == 'y': nom_nouvelle_playlist_spotify = input("Name of the new Spotify playlist\n@> ")
 else:nom_nouvelle_playlist_spotify = informations_deezer.json()['title']
 
 #Utilisation de la librairie Spotipy :
@@ -120,4 +132,8 @@ else:
 
 ##
 # webbrowser.open(f"https://www.deezer.com/fr/playlist/{id_playlist_deezer}") #On ouvre la playlist Deezer
+print("Done")
 webbrowser.open(f"https://open.spotify.com/playlist/{id_playlist_spotify}") #On ouvre la nouvelle playlist Spotify
+
+if len(liste_musique_pas_trouve) != 0:
+    print(f"\nSongs not found :\n{liste_musique_pas_trouve}\nNormally, these songs are not on Spotify. But you can always try to find them. If you find them, don't hesitate to show me on Github, I'll fix the code")
