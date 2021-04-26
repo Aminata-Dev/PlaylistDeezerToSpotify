@@ -15,7 +15,7 @@ import os #pour verifier si le fichier texte contenant les informations spotify 
 
 #P1 : Initialisation des variables, données et fonctions :
 
-id_playlist_deezer = input("Enter the link of the deezer : ( example : https://www.deezer.com/fr/playlist/1479458365 ) \n@> ")
+id_playlist_deezer = input("Enter the link of the deezer : ( example : https://www.deezer.com/fr/playlist/1479458365 or https://www.deezer.com/en/playlist/3884439882?utm_campaign=clipboard-generic ) \n@> ")
 
 try: id_playlist_deezer = id_playlist_deezer[id_playlist_deezer.index("playlist/")+9:] #On récupère l'id du lien en coupant le lien
 except ValueError: #Si le lien n'est pas valide, on sort du programme
@@ -79,7 +79,7 @@ def remede_probleme_recherche_spotify():
         try:resultats_musiques_spotify = sp.search(q=f"{titre} {artiste[0:artiste.index('&')]}", limit=1) #Dans certains titres, les artistes sont séparés par des '&' sur Deezer, mais pas sur Spotify ( --> l'on coupe alors le nom des artistes du début jusqu'au & )
         except ValueError: #Si le problème n'est toujours pas ça :
             print(f"{'*' * 80}\nThe song {titre} of {artiste} is certainly not on Spotify\n{'*' * 80}")
-            liste_musique_pas_trouve.append(titre + artiste)
+            liste_musique_pas_trouve.append(f"{titre} - {artiste}")
 
 
 #P2 : On récupère l'uri spotify de chaque musique de la playlist deezer :
@@ -99,8 +99,10 @@ try:
             print(f"{i + 1} : {son['name']} - {son['artists'][0]['name']}") #...on affiche le titre et son artiste dans la console ( i + 1 pour commencer à 1 )
             liste_uri_spotify_musiques.append(son['uri']) #On ajoute l'uri spotify ( identificateur ) de la musique dans une liste
         if compteur in [j for j in range(25, informations_deezer_tracks.json()['total'], 25)]: #le json affiche 25 sons sur une page, et les 25 autres sur l'autre page. Si nous avons parcouru les 25 sons de la page...
-            informations_deezer_tracks = requests.get(f"{informations_deezer_tracks.json()['next']}/tracks") #... on modifie la variable contenant les infos
-            compteur = 0
+            try:
+                informations_deezer_tracks = requests.get(f"{informations_deezer_tracks.json()['next']}/tracks") #... on modifie la variable contenant les infos
+                compteur = 0
+            except KeyError: pass #Si il n'y a pas / plus de next
 except spotipy.oauth2.SpotifyOauthError: #Si il n'y a plus de musique, on ne fait plus rien
     print("First time here ? You need to authorize third-party access in your browser ! If not, retry or create a new app.")
     os.remove("informations_spotify_accounts_in_order_to_automate_the_process.txt") #si les infos ne sont pas bonnes, on les supprime
@@ -133,7 +135,7 @@ else:
 
 ##
 # webbrowser.open(f"https://www.deezer.com/fr/playlist/{id_playlist_deezer}") #On ouvre la playlist Deezer
-print("Done")
+print("\nDone")
 webbrowser.open(f"https://open.spotify.com/playlist/{id_playlist_spotify}") #On ouvre la nouvelle playlist Spotify
 
 if len(liste_musique_pas_trouve) != 0:
