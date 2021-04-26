@@ -45,6 +45,7 @@ def ecriture_informations_fichier_texte(nom, id_, mdp):
 
 liste_uri_spotify_musiques = []
 liste_musique_pas_trouve = []
+demande_remplissage_automatique = 'n'
 
 if os.path.exists('informations_spotify_accounts_in_order_to_automate_the_process.txt'): #Si le fichier contenant les informations existe...
     demande_remplissage_automatique = input("\nInformations that you have entered previously has been found. Would you like to enter your Spotify username, Spotify Client ID and your Spotify Client Secret automatically ? ( y --> yes / other --> no )\n@> ") #...on demande à l'utilisateur s'il veut les rentrer automatiquement
