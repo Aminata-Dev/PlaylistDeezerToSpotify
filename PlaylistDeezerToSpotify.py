@@ -1,4 +1,4 @@
-print("Welcome ! This program allows the migration of Deezer playlist into Spotify playlist. The instructions are in English, but the comments are in French : don't hesitate to ask questions on the Github in case of misunderstanding :)\n")
+print("\n***\nWelcome ! This program allows the migration of Deezer playlist into Spotify playlist. The instructions are in English, but the comments are in French : don't hesitate to ask questions on the Github in case of misunderstanding. In order to test the code, I have made my account available. So there is no need to connect to your Spotify account.\n***\n")
 
 #P0 :  importations de modules
 
@@ -15,7 +15,7 @@ import os #pour verifier si le fichier texte contenant les informations spotify 
 
 #P1 : Initialisation des variables, données et fonctions :
 
-id_playlist_deezer = input("Enter the link of the deezer : ( example : https://www.deezer.com/fr/playlist/1479458365 or https://www.deezer.com/en/playlist/3884439882?utm_campaign=clipboard-generic ) \n@> ")
+id_playlist_deezer = input("Enter the link of the deezer : ( example : https://www.deezer.com/fr/playlist/1479458365 or https://www.deezer.com/en/playlist/5782150322?utm_campaign=clipboard-generic ) \n@> ")
 
 try: id_playlist_deezer = id_playlist_deezer[id_playlist_deezer.index("playlist/")+9:] #On récupère l'id du lien en coupant le lien
 except ValueError: #Si le lien n'est pas valide, on sort du programme
@@ -56,17 +56,20 @@ if os.path.exists('informations_spotify_accounts_in_order_to_automate_the_proces
             nom_utilisateur_spotify, id_client, mdp_client = lignes_fichier.split('\n')[0], lignes_fichier.split('\n')[1], lignes_fichier.split('\n')[2]
 if demande_remplissage_automatique != 'y': #Si l'utilisateur ne veut pas entrer ces informations automatiquement
     #Initialisation des données du compte spotify :
-    nom_utilisateur_spotify = input("\nWhat is your Spotify username ? : ( https://www.spotify.com/ca-en/account/overview/?utm_source=play&utm_campaign=wwwredirect > Copy/Past Username )\n@> ")
-    id_client = input("\nWhat is your Spotify Client ID ?\n --> If this is the first time you use the Spotify API : https://developer.spotify.com/dashboard > Create an app > Create > Edit Settings > in Redirect URIs put http://127.0.0.1:8080/ > Add > Go down > Save > Copy/Past Client ID\n --> If you already get an app > https://developer.spotify.com/dashboard > Go to your app > Edit Settings > in Redirect URIs put http://127.0.0.1:8080/ > Add > Go down > Save > Copy/Past Client ID )\n@> ")
-    mdp_client = input("\nWhat is your Spotify Client Secret ? ( https://developer.spotify.com/dashboard/applications > Go to your app > Show Client Secret > Copy/Past Client Secret )\n@> ")
+    nom_utilisateur_spotify = input("\nWhat is your Spotify username ? : ( https://www.spotify.com/ca-en/account/overview/?utm_source=play&utm_campaign=wwwredirect > Copy/Past Username )\n( You can use arghp85zv4fr9lieuyv1azqe5 to test the code )\n@> ")
+    id_client = input("\nWhat is your Spotify Client ID ?\n --> If this is the first time you use the Spotify API : https://developer.spotify.com/dashboard > Create an app > Create > Edit Settings > in Redirect URIs put http://127.0.0.1:8080/ > Add > Go down > Save > Copy/Past Client ID\n --> If you already get an app > https://developer.spotify.com/dashboard > Go to your app > Edit Settings > in Redirect URIs put http://127.0.0.1:8080/ > Add > Go down > Save > Copy/Past Client ID )\n( You can use 3e4adb55d5a44652baf952503c1148a8 to test the code )\n@> ")
+    mdp_client = input("\nWhat is your Spotify Client Secret ? ( https://developer.spotify.com/dashboard/applications > Go to your app > Show Client Secret > Copy/Past Client Secret )\n( You can use 9ca44fc7732b4f1ea25cc66da1fc4d01 to test the code )\n@> ")
     ecriture_informations_fichier_texte(nom_utilisateur_spotify, id_client, mdp_client)
 
-#Ces informations servent à utiliser l'api de Spotify ( voir SpotifyForDevelopers ) par l'intermédiaire de la librairie:
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id = id_client,
-                                            client_secret = mdp_client,
-                                            redirect_uri ="http://127.0.0.1:8080/",
-                                            username = nom_utilisateur_spotify,
-                                            scope = "playlist-modify-public"))
+try: #Si les informations ne sont pas bonnes
+    #Ces informations servent à utiliser l'api de Spotify ( voir SpotifyForDevelopers ) par l'intermédiaire de la librairie:
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id = id_client,
+                                                client_secret = mdp_client,
+                                                redirect_uri ="http://127.0.0.1:8080/",
+                                                username = nom_utilisateur_spotify,
+                                                scope = "playlist-modify-public"))
+except:
+    print("\nPlease try again. It should work.")
 
 print("\n( IF A WEB PAGE OPENS WITH 'INVALID_CLIENT: Invalid client' in, YOU DID NOT ENTER THE CORRECT SPOTIFY INFORMATIONS ( CHECK THE SPACES WHEN YOU ENTER THE DIFFERENT INFORMATIONS ) )\n")
 
@@ -103,9 +106,13 @@ try:
                 informations_deezer_tracks = requests.get(f"{informations_deezer_tracks.json()['next']}/tracks") #... on modifie la variable contenant les infos
                 compteur = 0
             except KeyError: pass #Si il n'y a pas / plus de next
-except spotipy.oauth2.SpotifyOauthError: #Si il n'y a plus de musique, on ne fait plus rien
-    print("First time here ? You need to authorize third-party access in your browser ! If not, retry or create a new app.")
-    os.remove("informations_spotify_accounts_in_order_to_automate_the_process.txt") #si les infos ne sont pas bonnes, on les supprime
+except: #Si il n'y a plus de musique, on ne fait plus rien
+    for fichier in os.listdir("."): #Le fichier cache crée des conflits
+        if fichier[0:7] == ".cache-":
+            os.remove(fichier)
+    print("\nPlease try again. It should work.")
+    try: os.remove("informations_spotify_accounts_in_order_to_automate_the_process.txt") #si les infos ne sont pas bonnes, on les supprime
+    except: pass
     exit()
 
 
@@ -137,6 +144,9 @@ else:
 # webbrowser.open(f"https://www.deezer.com/fr/playlist/{id_playlist_deezer}") #On ouvre la playlist Deezer
 print("\nDone")
 webbrowser.open(f"https://open.spotify.com/playlist/{id_playlist_spotify}") #On ouvre la nouvelle playlist Spotify
+
+if len(liste_musique_pas_trouve) != 0:
+    print(f"\nSongs not found :\n{liste_musique_pas_trouve}\nNormally, these songs are not on Spotify. But you can always try to find them. If you find them, don't hesitate to show me on Github, I'll fix the code")
 
 if len(liste_musique_pas_trouve) != 0:
     print(f"\nSongs not found :\n{liste_musique_pas_trouve}\nNormally, these songs are not on Spotify. But you can always try to find them. If you find them, don't hesitate to show me on Github, I'll fix the code")
